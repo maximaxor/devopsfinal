@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  image_processor:
+    build:
+      context: .
+      dockerfile: Dockerfile.image_processor
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - app-network
+
+  license_registry:
+    build:
+      context: .
+      dockerfile: Dockerfile.license_registry
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - app-network
+
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestrator
+    ports:
+      - "8000:8000"
+    depends_on:
+      - image_processor
+      - license_registry
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - app-network
+      
+  api_gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.api_gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - orchestrator
+    volumes:
+      - ./frontend:/app/public
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    
+  node-app:
+    build: .
+    image: node-app
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/dbdata
+    ports:
+      - '8085:8085'
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/src
+    networks:
+      - app-network
+
+  mongodb:
+    image: maximusmaxi/licenseregistrydb:lprdb
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

@@ -1,0 +1,9 @@
+Flask==2.0.1
+requests==2.26.0
+Werkzeug==2.0.1
+python-dotenv==0.19.0
+opencv-python-headless
+numpy
+matplotlib
+imutils==0.5.4
+easyocr
