@@ -1,7 +1,4 @@
 {
   "name": "license-plate-checker-frontend",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "echo 'No build step required'"
+  "version": "1.0.0"
   }
-}

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   image_processor:
     build:
@@ -36,7 +34,7 @@ services:
       - ./logs:/app/logs
     networks:
       - app-network
-      
+
   api_gateway:
     build:
       context: .
@@ -54,11 +52,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    ports:
-      - "80:80"
+    volumes:
+      - ./frontend:/app
     networks:
       - app-network
-    
+
   node-app:
     build: .
     image: node-app
@@ -74,7 +72,7 @@ services:
       - app-network
 
   mongodb:
-    image: maximusmaxi/licenseregistrydb:lprdb
+    image: mongo:latest
     ports:
       - '27017:27017'
     volumes:

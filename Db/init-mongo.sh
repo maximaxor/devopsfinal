@@ -1,2 +1,2 @@
 #!/bin/bash
-mongoimport --db lprdb  --type csv --headerline --file /data/dbdata.csv
+mongoimport --db dbdata  --type csv --headerline --file /data/dbdata.csv
