@@ -8,6 +8,10 @@ app = Flask(__name__)
 
 logger = setup_logger()
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "UP"}), 200
+
 #add logging
 @app.route('/check_license', methods=['GET'])
 def check_license():

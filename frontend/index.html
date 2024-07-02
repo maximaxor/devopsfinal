@@ -29,9 +29,20 @@
                 const response = await axios.post('/api/process_license_plate', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
+                
+                const data = response.data.data;
+                
                 resultDiv.innerHTML = `
-                    <p>License Plate: ${response.data.license_plate}</p>
-                    <p>Registry Info: ${JSON.stringify(response.data.registry_info)}</p>
+                    <h2>License Plate: ${data.license_plate}</h2>
+                    <ul>
+                        <li>Owner: ${data.owner}</li>
+                        <li>Model: ${data.model}</li>
+                        <li>Color: ${data.color}</li>
+                        <li>Engine Model: ${data.engine_model}</li>
+                        <li>Manufacturing Date: ${data.manufacturing_date}</li>
+                        <li>Car Type: ${data.car_type}</li>
+                        <li>Fanciness: ${data.fanciness}</li>
+                    </ul>
                 `;
             } catch (error) {
                 resultDiv.innerHTML = `Error: ${error.response?.data?.error || error.message}`;

@@ -2,4 +2,3 @@ FROM mongo
 COPY ./Db/dbdata.csv /data
 COPY ./Db/init-mongo.sh /docker-entrypoint-initdb.d/
 RUN chmod +x /docker-entrypoint-initdb.d/init-mongo.sh
-

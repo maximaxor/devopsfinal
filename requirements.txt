@@ -7,3 +7,4 @@ numpy
 matplotlib
 imutils==0.5.4
 easyocr
+pymongo
