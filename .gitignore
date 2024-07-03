@@ -128,3 +128,5 @@ dmypy.json
 cython_debug/
 
 dbdata.csv
+
+.jpg

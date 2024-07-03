@@ -2,6 +2,7 @@ FROM python:3.8-slim
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update && apt-get install -y iputils-ping
 COPY ./orchestrator.py .
 COPY logging_config.py logging_config.py
 CMD ["python", "orchestrator.py"]

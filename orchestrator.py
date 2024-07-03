@@ -32,7 +32,7 @@ def clean_and_format_data(api_data):
     else:
         return None
     
-# Helper function to convert ObjectId to string
+# Function to convert ObjectId to string
 def convert_objectid_to_str(document):
     if isinstance(document, dict):
         for key, value in document.items():
