@@ -81,6 +81,15 @@ services:
       - mongodb_data:/data/db
     networks:
       - app-network
+    
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./jenkins_home:/var/jenkins_home
+    networks:
+      - app-network
 
 networks:
   app-network:
@@ -88,3 +97,4 @@ networks:
 
 volumes:
   mongodb_data:
+  jenkins_home:
