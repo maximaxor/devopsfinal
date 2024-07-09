@@ -47,8 +47,10 @@ pipeline {
         }
         stage('Login to DockerHub') {
             steps {
-                script {
-                    sh "echo ${DOCKER_HUB_TOKEN} | docker login -u ${DOCKER_HUB_USERNAME} --password-stdin"
+                withCredentials([string(credentialsId: 'docker-hub-token', variable: 'DOCKER_HUB_TOKEN')]) {
+                    sh '''
+                    echo $DOCKER_HUB_TOKEN | docker login -u YOUR_DOCKER_HUB_USERNAME --password-stdin
+                    '''
                 }
             }
         }
