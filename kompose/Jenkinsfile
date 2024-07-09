@@ -1,0 +1,87 @@
+pipeline {
+    agent {
+        kubernetes {
+            yamlFile 'build-pod.yaml'
+            defaultContainer 'ez-docker-helm-build'
+        }
+    }
+    environment {
+        GITHUB_CREDENTIALS = credentials('git_hub')
+        DOCKER_HUB_USERNAME = credentials('docker_hub')
+        DOCKER_HUB_TOKEN = credentials('docker_hub')
+        IMAGE_NAME = 'coursedevops'
+        TAG = 'latest'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout code from GitHub
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/maximaxor/devopsfinal.git', credentialsId: 'git_hub']]])
+
+            }
+        }
+        stage('Install Docker') {
+            steps {
+                script {
+                    // Install Docker non-interactively
+                    sh '''
+                        curl -fsSL https://get.docker.com -o get-docker.sh
+                        sh get-docker.sh
+                        sudo usermod -aG docker $(whoami)
+                    '''
+                }
+            }
+        }
+        stage('Set up Docker Buildx') {
+            steps {
+                script {
+                    sh 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes'
+                    sh 'docker buildx create --use'
+                }
+            }
+        }
+        stage('Login to DockerHub') {
+            steps {
+                script {
+                    sh "echo ${DOCKER_HUB_TOKEN} | docker login -u ${DOCKER_HUB_USERNAME} --password-stdin"
+                }
+            }
+        }
+        stage('Set up Docker Compose') {
+            steps {
+                sh 'sudo apt-get update && sudo apt-get install -y docker-compose'
+            }
+        }
+        stage('Build and Run Containers') {
+            steps {
+                sh 'docker-compose up -d --build'
+            }
+        }
+        stage('Test') {
+            steps {
+               sh 'pytest project_test.py'
+            }
+        }
+        stage('Bump Version and Push Tag') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    def gitTag = sh(script: 'git describe --tags', returnStdout: true).trim()
+                    env.TAG = gitTag
+
+                    sh 'docker build -t ${IMAGE_NAME}:${TAG} .'
+                    sh 'docker tag ${IMAGE_NAME}:${TAG} maximusmaxi/${IMAGE_NAME}:${TAG}'
+                    sh 'docker push maximusmaxi/${IMAGE_NAME}:${TAG}'
+                }
+            }
+        }
+        stage('Clean up') {
+            steps {
+                sh 'docker-compose down'
+            }
+        }
+    }
+}
+//
