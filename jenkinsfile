@@ -8,7 +8,6 @@ pipeline {
     environment {
         GITHUB_CREDENTIALS = credentials('git_hub')
         DOCKER_HUB_USERNAME = credentials('docker_hub')
-        DOCKER_HUB_TOKEN = credentials('docker_hub')
         IMAGE_NAME = 'coursedevops'
         TAG = 'latest'
     }
@@ -45,7 +44,7 @@ pipeline {
                 }
             }
         }
-         stage('Login to DockerHub') {
+        stage('Login to DockerHub') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'DOCKER_HUB_CREDENTIALS_PSW', usernameVariable: 'DOCKER_HUB_CREDENTIALS_USR')]) {
@@ -53,6 +52,7 @@ pipeline {
                     }
                 }
             }
+        } // Closing brace for Login to DockerHub stage
         stage('Set up Docker Compose') {
             steps {
                 sh 'sudo apt-get update && sudo apt-get install -y docker-compose'
@@ -65,7 +65,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-               sh 'pytest project_test.py'
+                sh 'pytest project_test.py'
             }
         }
         stage('Bump Version and Push Tag') {
