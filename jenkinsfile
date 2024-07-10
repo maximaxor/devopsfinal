@@ -8,6 +8,7 @@ pipeline {
     environment {
         GITHUB_CREDENTIALS = credentials('git_hub')
         DOCKER_HUB_USERNAME = credentials('docker_hub')
+        DOCKER_HUB_TOKEN = credentials('docker_hub')
         IMAGE_NAME = 'coursedevops'
         TAG = 'latest'
     }
