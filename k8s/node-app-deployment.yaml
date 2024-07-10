@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-app
+  template:
+    metadata:
+      labels:
+        app: node-app
+    spec:
+      containers:
+        - name: node-app
+          image: maximusmaxi/node-app:latest
+          ports:
+            - containerPort: 8085
+          env:
+            - name: MONGODB_URL
+              value: mongodb://mongodb:27017/dbdata

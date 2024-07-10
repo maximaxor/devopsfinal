@@ -57,14 +57,14 @@ def process_license_plate():
         files = {'image': (file.filename, file.stream, file.content_type)}
 
         # Process the image using the image processor service
-        image_resp = requests.post('http://image_processor:5000/image_processing', files=files)
+        image_resp = requests.post('http://image-processor.default.svc.cluster.local:5000/image_processing', files=files)
 
         if image_resp.status_code != 200:
-            app.logger.error(f"Error from image_processor: {image_resp.text}")
+            app.logger.error(f"Error from image-processor: {image_resp.text}")
             return jsonify({"error": "Failed to process image"}), image_resp.status_code
 
         result = image_resp.json()
-        app.logger.info(f"Response from image_processor: {result}")
+        app.logger.info(f"Response from image-processor: {result}")
 
         # Check if the result is a list and extract the license text
         if isinstance(result, list) and len(result) > 0:
@@ -82,7 +82,7 @@ def process_license_plate():
 
         # If not in the database, check with the external API
         try:
-            api_resp = requests.get(f'http://license_registry:5001/check_license?number={license_text}')
+            api_resp = requests.get(f'http://license-registry.default.svc.cluster.local:5001/check_license?number={license_text}')
             api_resp.raise_for_status()
         except requests.exceptions.RequestException as e:
             app.logger.error(f"Errdor from external API: {e}")

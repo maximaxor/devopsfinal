@@ -9,7 +9,6 @@ pipeline {
         GITHUB_CREDENTIALS = credentials('git_hub')
         DOCKER_HUB_USERNAME = credentials('docker_hub')
         DOCKER_HUB_TOKEN = credentials('docker_hub')
-        IMAGE_NAME = 'coursedevops'
         TAG = 'latest'
     }
     stages {
@@ -41,26 +40,39 @@ pipeline {
             steps {
                 script {
                     sh 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes'
-                    sh 'docker buildx create --use'
+                    sh 'docker buildx create --use --name builder-$(uuidgen)'
                 }
             }
         }
         stage('Login to DockerHub') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'DOCKER_HUB_CREDENTIALS_PSW', usernameVariable: 'DOCKER_HUB_CREDENTIALS_USR')]) {
-                        sh "echo \$DOCKER_HUB_CREDENTIALS_PSW | docker login -u \$DOCKER_HUB_CREDENTIALS_USR --password-stdin"
+                    withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'DOCKER_HUB_TOKEN', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
+                        sh "echo \$DOCKER_HUB_TOKEN | docker login -u \$DOCKER_HUB_USERNAME --password-stdin"
                     }
                 }
-            }
-        } // Closing brace for Login to DockerHub stage
-        stage('Set up Docker Compose') {
-            steps {
-                sh 'sudo apt-get update && sudo apt-get install -y docker-compose'
             }
         }
         stage('Build and Run Containers') {
             steps {
+                script {
+                    // Sequential build for each service to avoid conflicts
+                    def services = [
+                        ['name': 'license-registry', 'dockerfile': 'Dockerfile.license_registry'],
+                        ['name': 'node-app', 'dockerfile': './node-app/Dockerfile.node'],
+                        ['name': 'image-processor', 'dockerfile': 'Dockerfile.image_processor'],
+                        ['name': 'frontend', 'dockerfile': 'Dockerfile.frontend'],
+                        ['name': 'orchestrator', 'dockerfile': 'Dockerfile.orchestrator'],
+                        ['name': 'api-gateway', 'dockerfile': 'Dockerfile.api_gateway'],
+                        ['name': 'mongo-db', 'dockerfile': 'Dockerfile.MongoDb']
+                    ]
+                    services.each { service ->
+                        def buildName = "builder-${service.name}"
+                        sh "docker buildx create --use --name ${buildName}"
+                        sh "docker build -t maximusmaxi/${service.name}:${TAG} -f ${service.dockerfile} ."
+                        sh "docker buildx rm ${buildName}"
+                    }
+                }
                 sh 'docker-compose up -d --build'
             }
         }
@@ -69,18 +81,16 @@ pipeline {
                 sh 'pytest project_test.py'
             }
         }
-        stage('Bump Version and Push Tag') {
-            when {
-                branch 'main'
-            }
+        stage('Push Images to Docker Hub') {
             steps {
                 script {
-                    def gitTag = sh(script: 'git describe --tags', returnStdout: true).trim()
-                    env.TAG = gitTag
-
-                    sh 'docker build -t ${IMAGE_NAME}:${TAG} .'
-                    sh 'docker tag ${IMAGE_NAME}:${TAG} maximusmaxi/${IMAGE_NAME}:${TAG}'
-                    sh 'docker push maximusmaxi/${IMAGE_NAME}:${TAG}'
+                    def services = ['license-registry', 'node-app', 'image-processor', 'frontend', 'orchestrator', 'api-gateway', 'mongo-db']
+                    withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'DOCKER_HUB_TOKEN', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
+                        sh "docker login -u \$DOCKER_HUB_USERNAME -p \$DOCKER_HUB_TOKEN"
+                        services.each { service ->
+                            sh "docker push maximusmaxi/${service}:${TAG}"
+                        }
+                    }
                 }
             }
         }

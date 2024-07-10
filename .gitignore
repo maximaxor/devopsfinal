@@ -130,3 +130,4 @@ cython_debug/
 dbdata.csv
 
 .jpg
+/jenkins_home

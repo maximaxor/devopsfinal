@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-processor
+  labels:
+    app: image-processor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-processor
+  template:
+    metadata:
+      labels:
+        app: image-processor
+    spec:
+      containers:
+        - name: image-processor
+          image: maximusmaxi/image-processor:latest
+          ports:
+            - containerPort: 5000

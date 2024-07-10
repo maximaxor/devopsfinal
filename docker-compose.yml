@@ -1,8 +1,8 @@
 services:
-  image_processor:
+  image-processor:
     build:
       context: .
-      dockerfile: Dockerfile.image_processor
+      dockerfile: Dockerfile.image-processor
     ports:
       - "5000:5000"
     volumes:
@@ -10,10 +10,10 @@ services:
     networks:
       - app-network
 
-  license_registry:
+  license-registry:
     build:
       context: .
-      dockerfile: Dockerfile.license_registry
+      dockerfile: Dockerfile.license-registry
     ports:
       - "5001:5001"
     volumes:
@@ -28,21 +28,19 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - image_processor
-      - license_registry
+      - image-processor
+      - license-registry
     volumes:
       - ./logs:/app/logs
     networks:
       - app-network
 
-  api_gateway:
+  api-gateway:
     build:
       context: .
-      dockerfile: Dockerfile.api_gateway
+      dockerfile: Dockerfile.api-gateway
     ports:
       - "3000:3000"
-    depends_on:
-      - orchestrator
     volumes:
       - ./frontend:/app/public
     networks:
@@ -52,6 +50,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+    ports:
+      - "7233:7233"
     volumes:
       - ./frontend:/app
     networks:

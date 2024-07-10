@@ -64,8 +64,8 @@ def ping_container(container_name, target_name):
         return False
 
 def test_ping_between_containers():
-    assert ping_container("speed_camera_project-orchestrator-1", "speed_camera_project-license_registry-1"), "Ping to license_registry failed"
-    assert ping_container("speed_camera_project-orchestrator-1", "speed_camera_project-image_processor-1"), "Ping to image_processor failed"
+    assert ping_container("speed_camera_project-orchestrator-1", "speed_camera_project-license-registry-1"), "Ping to license-registry failed"
+    assert ping_container("speed_camera_project-orchestrator-1", "speed_camera_project-image-processor-1"), "Ping to image-processor failed"
 
 def is_responsive(url):
     try:

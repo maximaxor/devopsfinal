@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: image-processor
+  name: image-processor-cm0
