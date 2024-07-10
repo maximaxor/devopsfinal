@@ -45,15 +45,14 @@ pipeline {
                 }
             }
         }
-        stage('Login to DockerHub') {
+         stage('Login to DockerHub') {
             steps {
-                withCredentials([string(credentialsId: 'docker-hub-token', variable: 'DOCKER_HUB_TOKEN')]) {
-                    sh '''
-                    echo $DOCKER_HUB_TOKEN | docker login -u YOUR_DOCKER_HUB_USERNAME --password-stdin
-                    '''
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'DOCKER_HUB_CREDENTIALS_PSW', usernameVariable: 'DOCKER_HUB_CREDENTIALS_USR')]) {
+                        sh "echo \$DOCKER_HUB_CREDENTIALS_PSW | docker login -u \$DOCKER_HUB_CREDENTIALS_USR --password-stdin"
+                    }
                 }
             }
-        }
         stage('Set up Docker Compose') {
             steps {
                 sh 'sudo apt-get update && sudo apt-get install -y docker-compose'
