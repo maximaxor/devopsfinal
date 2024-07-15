@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
     - name: ez-docker-helm-build
-      image: ezezeasy/ez-docker-helm-build:1.41
+      image: maximusmaxi/custom:latest
       imagePullPolicy: Always
       securityContext:
         privileged: true
