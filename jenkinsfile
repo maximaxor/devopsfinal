@@ -36,17 +36,6 @@ pipeline {
                 }
             }
         }
-         stage('Install Kubectl') {
-            steps {
-                script {
-                    sh '''
-                        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-                        chmod +x kubectl
-                        mv kubectl /usr/local/bin/
-                    '''
-                }
-            }
-        }
         stage('Set up Docker Buildx') {
             steps {
                 script {
@@ -88,16 +77,15 @@ pipeline {
         }
         stage('Test') {
             steps {
-                script {
-                    sh '''
-                        kubectl run tests --image=maximusmaxi/tests --restart=Never -- /bin/sh -c "pytest"
-                        kubectl wait --for=condition=complete pod/tests --timeout=60s
-                        kubectl logs tests
-                        kubectl delete pod tests
-                    '''
+                container('python-test') {
+                    script {
+                        sh '''
+                            pytest
+                        '''
+                    }
                 }
             }
-        }   
+        }
         stage('Push Images to Docker Hub') {
             steps {
                 script {
