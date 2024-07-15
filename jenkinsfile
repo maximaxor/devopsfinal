@@ -96,7 +96,8 @@ pipeline {
                         kubectl delete pod tests
                     '''
                 }
-        }
+            }
+        }   
         stage('Push Images to Docker Hub') {
             steps {
                 script {
