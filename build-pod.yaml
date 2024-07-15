@@ -11,23 +11,12 @@ spec:
         privileged: true
 
     - name: python-test
-      image: python:3.9-slim
+      image: maximusmaxi/tests
       command: ["sleep"]
       args: ["infinity"]
       imagePullPolicy: Always
       securityContext:
         privileged: false
-
-    - name: docker-compose
-      image: docker/compose:latest
-      command: ["sleep"]
-      args: ["infinity"]
-      imagePullPolicy: Always
-      securityContext:
-        privileged: true
-      volumeMounts:
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
 
   volumes:
     - name: docker-socket
