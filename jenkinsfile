@@ -59,12 +59,12 @@ pipeline {
                     // Sequential build for each service to avoid conflicts
                     def services = [
                         ['name': 'license-registry', 'dockerfile': 'Dockerfile.license-registry'],
-                        ['name': 'node-app', 'dockerfile': './node-app/Dockerfile.node'],
+                        ['name': 'node', 'dockerfile': './node-app/Dockerfile.node'],
                         ['name': 'image-processor', 'dockerfile': 'Dockerfile.image-processor'],
                         ['name': 'frontend', 'dockerfile': 'Dockerfile.frontend'],
                         ['name': 'orchestrator', 'dockerfile': 'Dockerfile.orchestrator'],
                         ['name': 'api-gateway', 'dockerfile': 'Dockerfile.api-gateway'],
-                        ['name': 'mongo-db', 'dockerfile': './mongodb/Dockerfile.mongodb']
+                        ['name': 'mongodb', 'dockerfile': './mongodb/Dockerfile.mongodb']
                     ]
                     services.each { service ->
                         def buildName = "builder-${service.name}"
