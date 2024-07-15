@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: run-tests
+spec:
+  template:
+    spec:
+      containers:
+      - name: test
+        image: maximusmaxi/tests:latest
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+      restartPolicy: Never
+  backoffLimit: 4
