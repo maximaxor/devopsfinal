@@ -1,0 +1,10 @@
+FROM python:3.8-slim
+WORKDIR /app
+COPY requirements-test.txt .
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r requirements-test.txt
+COPY test_image.jpg /app
+COPY orchestrator.py /app
+COPY project_test.py /app
+COPY logging_config.py /app
+CMD ["pytest", "project_test.py"]

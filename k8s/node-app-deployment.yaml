@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: node-app
-          image: maximusmaxi/node-app:latest
+          image: maximusmaxi/node:latest
           ports:
             - containerPort: 8085
           env:
