@@ -1,19 +1,32 @@
 FROM ubuntu:latest
+
+# Install necessary packages
 RUN apt-get update && \
     apt-get install -y \
         curl \
         gnupg \
-        docker.io && \
+        docker.io \
+        sudo && \
     apt-get clean
+
+# Add Helm repository and install Helm
 RUN curl https://baltocdn.com/helm/signing.asc | apt-key add - && \
     apt-get install -y apt-transport-https && \
     echo "deb https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list && \
     apt-get update && \
     apt-get install -y helm && \
     apt-get clean
+
+# Install kubectl
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
     chmod +x kubectl && \
     mv kubectl /usr/local/bin/
+
+# Set working directory
 WORKDIR /root
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s CMD curl -f http://localhost:9000 || exit 1
-CMD ["bash"]
+
+# Add current user to Docker group
+RUN usermod -aG docker root
+
+# Default command
+CMD ["bash", "-c", "while :; do sleep 3600; done"]

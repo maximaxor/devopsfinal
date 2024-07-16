@@ -18,24 +18,18 @@ pipeline {
                 checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/maximaxor/devopsfinal.git', credentialsId: 'git_hub']]])
             }
         }
-        stage('Install Docker if not present') {
+        stage('Setup Docker') {
             steps {
                 script {
-                    // Check if Docker is installed and install it if not
-                    sh '''
-                        if ! command -v docker &> /dev/null
-                        then
-                            echo "Docker not found, installing..."
-                            curl -fsSL https://get.docker.com -o get-docker.sh
-                            sh get-docker.sh
-                            sudo usermod -aG docker $(whoami)
-                        else
-                            echo "Docker is already installed"
-                        fi
-                    '''
+                    sh """
+                    echo Docker not found, installing...
+                    curl -fsSL https://get.docker.com -o get-docker.sh
+                    sh get-docker.sh
+                    # Adding current user to Docker group
+                    sudo usermod -aG docker \$(whoami)
+                    """
                 }
             }
-        }
         stage('Set up Docker Buildx') {
             steps {
                 script {
