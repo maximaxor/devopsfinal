@@ -11,7 +11,7 @@ def client():
 
 @pytest.fixture(scope="module")
 def mongo_client():
-    client = MongoClient('mongodb://mongodb:27017')
+    client = MongoClient('mongodb://mongodb.default.svc.cluster.local:27017')
     yield client
     client.close()
 
