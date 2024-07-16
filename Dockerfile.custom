@@ -23,9 +23,9 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
     mv kubectl /usr/local/bin/
 
 # Install Docker Buildx
-RUN mkdir -p ~/.docker/cli-plugins && \
-    curl -sSL https://github.com/docker/buildx/releases/latest/download/buildx-v0.10.4.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx && \
-    chmod +x ~/.docker/cli-plugins/docker-buildx
+RUN mkdir -p /usr/lib/docker/cli-plugins/ && \
+    curl -SL https://github.com/docker/buildx/releases/latest/download/buildx-$(uname -s)-$(uname -m) -o /usr/lib/docker/cli-plugins/docker-buildx && \
+    chmod +x /usr/lib/docker/cli-plugins/docker-buildx
 
 # Add current user to Docker group
 RUN usermod -aG docker root
