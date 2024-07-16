@@ -6,6 +6,8 @@ spec:
   containers:
     - name: ez-docker-helm-build
       image: maximusmaxi/custom:latest
+      command: ["sleep"]
+      args: ["infinity"]
       imagePullPolicy: Always
       securityContext:
         privileged: true
