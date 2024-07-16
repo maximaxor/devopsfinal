@@ -6,14 +6,12 @@ import os
 from bson import ObjectId
 
 app = Flask(__name__)
-
 logger = setup_logger()
 
 # Initialize MongoDB connection
 mongo_client = MongoClient(os.getenv('MONGODB_URL', 'mongodb://mongodb:27017'))
 db = mongo_client.dbdata
 collection = db.license_plates
-
 
 # Function to clean and format the data
 def clean_and_format_data(api_data):
@@ -58,8 +56,7 @@ def process_license_plate():
 
         # Process the image using the image processor service
         image_resp = requests.post('http://image-processor.default.svc.cluster.local:5000/image_processing', files=files)
-        app.logger.info(f"Response from image-processor: {image_resp.json()}")  # Logging the response from image-processor
-
+        app.logger.info(f"Response from image-processor: {image_resp.json()}")
 
         if image_resp.status_code != 200:
             app.logger.error(f"Error from image-processor: {image_resp.text}")
@@ -81,15 +78,19 @@ def process_license_plate():
         existing_record = collection.find_one({"license_plate": license_text})
         if existing_record:
             # Optionally update existing record
-            collection.update_one({"license_plate": license_text}, {"$set": result})
-            return jsonify({"license_plate_text": license_text, "data": convert_objectid_to_str(existing_record)})
+            updated_record = collection.find_one_and_update(
+                {"license_plate": license_text},
+                {"$set": {"text": license_text}},  # Adjust this line to update the necessary fields correctly
+                return_document=True
+            )
+            return jsonify({"license_plate_text": license_text, "data": convert_objectid_to_str(updated_record)})
 
         # If not in the database, check with the external API
         try:
             api_resp = requests.get(f'http://license-registry.default.svc.cluster.local:5001/check_license?number={license_text}')
             api_resp.raise_for_status()
         except requests.exceptions.RequestException as e:
-            app.logger.error(f"Errdor from external API: {e}")
+            app.logger.error(f"Error from external API: {e}")
             return jsonify({"error": "Failed to check license with external API"}), 500
 
         api_data = api_resp.json()
@@ -100,26 +101,25 @@ def process_license_plate():
             app.logger.error(f"Expected dictionary but got list: {api_data}")
             return jsonify({"error": "Invalid data format from external API"}), 500
 
-        # Clean and format the datad
+        # Clean and format the data
         cleaned_data = clean_and_format_data(api_data)
 
         if not cleaned_data:
             return jsonify({"error": "No data found for the given license plate"}), 404
         
+        # Insert the cleaned data into the database
         collection.insert_one(cleaned_data)
-        
         cleaned_data = convert_objectid_to_str(cleaned_data)
 
-        # Insert the cleaned data into the database
+        # Store the cleaned data in node-app
         response = requests.post('http://node-app.default.svc.cluster.local:8085/store_license_plate', json=cleaned_data)
         app.logger.info(f"Response from node-app: {response.text}")
-
 
         if response.status_code != 200:
             app.logger.error(f"Error storing data in node-app: {response.text}")
             return jsonify({"error": "Failed to store data in node-app"}), response.status_code
         
-        return jsonify({"license_plate_text": license_text, "data": convert_objectid_to_str(cleaned_data)})
+        return jsonify({"license_plate_text": license_text, "data": cleaned_data})
 
     except Exception as e:
         app.logger.error(f"Error processing license plate: {e}")
