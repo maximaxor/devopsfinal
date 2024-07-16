@@ -2,7 +2,7 @@ pipeline {
     agent {
         kubernetes {
             yamlFile 'build-pod.yaml'
-            defaultContainer 'ez-docker-helm-build'
+            defaultContainer 'custom'
         }
     }
     environment {
@@ -19,20 +19,20 @@ pipeline {
             }
         }
         stage('Setup Docker') {
-        steps {
-            script {
-                def dockerInstalled = sh(script: 'command -v docker', returnStatus: true) == 0
-                if (!dockerInstalled) {
-                    sh """
-                    echo Docker not found, installing...
-                    curl -fsSL https://get.docker.com -o get-docker.sh
-                    sh get-docker.sh
-                    """
-                } else {
-                    echo "Docker is already installed"
-                }
-                // Adding current user to Docker group
-                sh 'sudo usermod -aG docker $(whoami)'
+            steps {
+                script {
+                    def dockerInstalled = sh(script: 'command -v docker', returnStatus: true) == 0
+                    if (!dockerInstalled) {
+                        sh """
+                        echo Docker not found, installing...
+                        curl -fsSL https://get.docker.com -o get-docker.sh
+                        sh get-docker.sh
+                        """
+                    } else {
+                        echo "Docker is already installed"
+                    }
+                    // Adding current user to Docker group
+                    sh 'sudo usermod -aG docker $(whoami)'
                 }
             }
         }

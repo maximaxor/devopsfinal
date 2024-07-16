@@ -22,11 +22,16 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
     chmod +x kubectl && \
     mv kubectl /usr/local/bin/
 
-# Set working directory
-WORKDIR /root
+# Install Docker Buildx
+RUN mkdir -p ~/.docker/cli-plugins && \
+    curl -sSL https://github.com/docker/buildx/releases/latest/download/buildx-v0.10.4.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx && \
+    chmod +x ~/.docker/cli-plugins/docker-buildx
 
 # Add current user to Docker group
 RUN usermod -aG docker root
+
+# Set working directory
+WORKDIR /root
 
 # Default command
 CMD ["bash", "-c", "while :; do sleep 3600; done"]
