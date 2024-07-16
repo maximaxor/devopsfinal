@@ -2,7 +2,7 @@ pipeline {
     agent {
         kubernetes {
             yamlFile 'build-pod.yaml'
-            defaultContainer 'custom'
+            defaultContainer 'ez-docker-helm-build'
         }
     }
     environment {
