@@ -33,6 +33,7 @@ pipeline {
                 }
                 // Adding current user to Docker group
                 sh 'sudo usermod -aG docker $(whoami)'
+                }
             }
         }
         stage('Set up Docker Buildx') {
