@@ -36,7 +36,7 @@ pipeline {
                 }
             }
         }
-        stage('Setup Docker') {
+        stage('Setup Dockerv2') {
             steps {
                 script {
                     sh 'ps aux | grep dockerd'
