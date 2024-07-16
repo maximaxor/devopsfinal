@@ -52,8 +52,17 @@ pipeline {
                 script {
                     sh 'docker version'
                     sh 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes'
+                    
+                    // Install Docker Buildx
+                    sh '''
+                        mkdir -p /usr/lib/docker/cli-plugins/ && \
+                        curl -SL https://github.com/docker/buildx/releases/latest/download/buildx-$(uname -s)-$(uname -m) -o /usr/lib/docker/cli-plugins/docker-buildx && \
+                        chmod +x /usr/lib/docker/cli-plugins/docker-buildx
+                    '''
+                    
                     def uniqueId = sh(script: 'echo $(date +%s%N | md5sum | head -c 20)', returnStdout: true).trim()
                     def buildxAvailable = sh(script: 'docker buildx version', returnStatus: true) == 0
+                    
                     if (buildxAvailable) {
                         sh "docker buildx create --name builder-${uniqueId}"
                         sh "docker buildx use builder-${uniqueId}"
@@ -63,6 +72,7 @@ pipeline {
                 }
             }
         }
+
         stage('Login to DockerHub') {
             steps {
                 script {
