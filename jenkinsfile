@@ -30,6 +30,7 @@ pipeline {
                     """
                 }
             }
+        }
         stage('Set up Docker Buildx') {
             steps {
                 script {
@@ -83,7 +84,7 @@ pipeline {
         stage('Push Images to Docker Hub') {
             steps {
                 script {
-                    def services = ['license-registry', 'node-app', 'image-processor', 'frontend', 'orchestrator', 'api-gateway', 'mongo-db']
+                    def services = ['license-registry', 'node-app', 'image-processor', 'frontend', 'orchestrator', 'api-gateway', 'mongodb']
                     withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'DOCKER_HUB_TOKEN', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
                         sh "docker login -u \$DOCKER_HUB_USERNAME -p \$DOCKER_HUB_TOKEN"
                         services.each { service ->
