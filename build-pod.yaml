@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
     - name: ez-docker-helm-build
-      image: maximusmaxi/custom:latest
+      image: ezezeasy/ez-docker-helm-build:1.41
       command: ["sleep"]
       args: ["infinity"]
       imagePullPolicy: Always
