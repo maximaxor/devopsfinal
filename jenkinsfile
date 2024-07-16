@@ -36,10 +36,11 @@ pipeline {
                 }
             }
         }
-        stage('Setup Dockerv2') {
+        stage('Setup Docker') {
             steps {
                 script {
-                    sh 'sudo systemctl status docker || sudo systemctl start docker'
+                    sh 'ps aux | grep dockerd'
+                    sh 'docker version || (sudo dockerd & sleep 10)'
                     sh 'sudo usermod -aG docker $(whoami)'
                     sh 'ls -l /var/run/docker.sock'
                     sh 'docker info'
