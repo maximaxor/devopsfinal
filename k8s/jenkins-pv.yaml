@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jenkins-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "C:\Users\maxim\Documents\Code\Dev\New_folder\speed_camera_project\jenkins_home"  # Change this path based on your setup

@@ -11,6 +11,7 @@ spec:
       imagePullPolicy: Always
       securityContext:
         privileged: true
+        runAsUser: 0
 
     - name: python-test
       image: maximusmaxi/tests
