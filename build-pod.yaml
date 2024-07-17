@@ -12,6 +12,10 @@ spec:
       securityContext:
         privileged: true
         runAsUser: 0
+      volumeMounts:
+      - mountPath: /var/run/docker.sock
+        name: docker-sock
+        readOnly: false
 
     - name: python-test
       image: maximusmaxi/tests
