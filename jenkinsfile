@@ -11,12 +11,6 @@ pipeline {
         DOCKER_HUB_TOKEN = credentials('docker_hub')
         TAG = 'latest'
     }
-    options {
-        // Keep 5 builds for debugging purposes
-        buildDiscarder(logRotator(numToKeepStr: '5'))
-        // Set timeouts to avoid hanging jobs
-        timeout(time: 60, unit: 'MINUTES')
-    }
     stages {
         stage('Checkout') {
             steps {
