@@ -14,7 +14,7 @@ spec:
         runAsUser: 0
       volumeMounts:
       - mountPath: /var/run/docker.sock
-        name: docker-sock
+        name: docker-socket
         readOnly: false
 
     - name: python-test
