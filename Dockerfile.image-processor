@@ -3,7 +3,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install  -r requirements.txt
 COPY ./image-processor.py .
 COPY logging_config.py logging_config.py
 CMD ["python", "image-processor.py"]

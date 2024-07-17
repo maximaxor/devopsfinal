@@ -119,7 +119,7 @@ pipeline {
             steps {
                 script {
                     echo "Pushing images to DockerHub"
-                    def services = ['license-registry', 'node-app', 'image-processor', 'frontend', 'orchestrator', 'api-gateway', 'mongo-db']
+                    def services = ['license-registry', 'node', 'image-processor', 'frontend', 'orchestrator', 'api-gateway', 'mongo-db']
                     withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'DOCKER_HUB_TOKEN', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
                         sh "docker login -u \$DOCKER_HUB_USERNAME -p \$DOCKER_HUB_TOKEN"
                         services.each { service ->
