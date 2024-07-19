@@ -80,7 +80,7 @@ def process_license_plate():
             # Optionally update existing record
             updated_record = collection.find_one_and_update(
                 {"license_plate": license_text},
-                {"$set": {"text": license_text}},  # Adjust this line to update the necessary fields correctly
+                {"$set": {"license_plate": license_text}},  # Correct this line
                 return_document=True
             )
             return jsonify({"license_plate_text": license_text, "data": convert_objectid_to_str(updated_record)})
