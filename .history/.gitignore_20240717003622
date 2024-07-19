@@ -130,4 +130,3 @@ cython_debug/
 dbdata.csv
 /jenkins_home
 .jpg
-argocd.exe
