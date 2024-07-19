@@ -1,0 +1,17 @@
+apigateway:
+  replicanum: 1
+
+frontend:
+  replicanum: 1
+
+imageprocessor:
+  replicanum: 1
+
+licenseregistry:
+  replicanum: 1
+
+nodeapp:
+  replicanum: 1
+
+orchestrator:
+  replicanum: 1

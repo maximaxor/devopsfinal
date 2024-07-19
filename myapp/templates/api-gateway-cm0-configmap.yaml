@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  index.html: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>License Plate Checker</title>\n    <script src=\"https://unpkg.com/axios/dist/axios.min.js\"></script>\n</head>\n<body>\n    <h1>License Plate Checker</h1>\n    <input type=\"file\" id=\"imageInput\" accept=\"image/*\">\n    <button onclick=\"processImage()\">Process Image</button>\n    <div id=\"result\"></div>\n\n    <script>\n        async function processImage() {\n            const imageInput = document.getElementById('imageInput');\n            const resultDiv = document.getElementById('result');\n            \n            if (!imageInput.files[0]) {\n                alert('Please select an image');\n                return;\n            }\n\n            const formData = new FormData();\n            formData.append('image', imageInput.files[0]);\n\n            try {\n                const response = await axios.post('/api/process_license_plate', formData, {\n                    headers: { 'Content-Type': 'multipart/form-data' }\n                });\n                \n                const data = response.data.data;\n                \n                resultDiv.innerHTML = `\n                    <h2>License Plate: ${data.license_plate}</h2>\n                    <ul>\n                        <li>Owner: ${data.owner}</li>\n                        <li>Model: ${data.model}</li>\n                        <li>Color: ${data.color}</li>\n                        <li>Engine Model: ${data.engine_model}</li>\n                        <li>Manufacturing Date: ${data.manufacturing_date}</li>\n                        <li>Car Type: ${data.car_type}</li>\n                        <li>Fanciness: ${data.fanciness}</li>\n                    </ul>\n                `;\n            } catch (error) {\n                resultDiv.innerHTML = `Error: ${error.response?.data?.error || error.message}`;\n            }\n        }\n    </script>\n</body>\n</html>\n"
+  package.json: |-
+    {
+      "name": "license-plate-checker-frontend",
+      "version": "1.0.0"
+      }
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: api-gateway
+  name: api-gateway-cm0
