@@ -131,3 +131,5 @@ dbdata.csv
 /jenkins_home
 .jpg
 .exe
+argocd.exe
+.history
