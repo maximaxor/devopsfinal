@@ -1,0 +1,66 @@
+apiVersion: v1
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>License Plate Checker</title>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    </head>
+    <body>
+        <h1>License Plate Checker</h1>
+        <input type="file" id="imageInput" accept="image/*">
+        <button onclick="processImage()">Process Image</button>
+        <div id="result"></div>
+
+        <script>
+            async function processImage() {
+                const imageInput = document.getElementById('imageInput');
+                const resultDiv = document.getElementById('result');
+                
+                if (!imageInput.files[0]) {
+                    alert('Please select an image');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('image', imageInput.files[0]);
+
+                try {
+                    const response = await axios.post('/api/process_license_plate', formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    
+                    const data = response.data.data;
+                    
+                    resultDiv.innerHTML = `
+                        <h2>License Plate: ${data.license_plate}</h2>
+                        <ul>
+                            <li>Owner: ${data.owner}</li>
+                            <li>Model: ${data.model}</li>
+                            <li>Color: ${data.color}</li>
+                            <li>Engine Model: ${data.engine_model}</li>
+                            <li>Manufacturing Date: ${data.manufacturing_date}</li>
+                            <li>Car Type: ${data.car_type}</li>
+                            <li>Fanciness: ${data.fanciness}</li>
+                        </ul>
+                    `;
+                } catch (error) {
+                    resultDiv.innerHTML = `Error: ${error.response?.data?.error || error.message}`;
+                }
+            }
+        </script>
+    </body>
+    </html>
+  package.json: |
+    {
+      "name": "license-plate-checker-frontend",
+      "version": "1.0.0"
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: frontend
+  name: frontend-cm0

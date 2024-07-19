@@ -1,0 +1,50 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pod-and-service-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  groups:
+  - name: pod-and-service-alerts
+    rules:
+    - alert: AllPodsRunningInDefault
+      expr: |
+        count(kube_pod_status_phase{namespace="default", phase="Running"}) == count(kube_pod_status_phase{namespace="default"})
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "All Pods are not Running in the default namespace"
+        description: "One or more pods in the default namespace are not in the Running state."
+
+    - alert: AllServicesActiveInDefault
+      expr: |
+        count(kube_service_info{namespace="default"}) == count(kube_service_status{namespace="default", status="Active"})
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "All Services are not Active in the default namespace"
+        description: "One or more services in the default namespace are not in the Active state."
+
+    - alert: AllPodsRunningInMonitoring
+      expr: |
+        count(kube_pod_status_phase{namespace="monitoring", phase="Running"}) == count(kube_pod_status_phase{namespace="monitoring"})
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "All Pods are not Running in the monitoring namespace"
+        description: "One or more pods in the monitoring namespace are not in the Running state."
+
+    - alert: AllServicesActiveInMonitoring
+      expr: |
+        count(kube_service_info{namespace="monitoring"}) == count(kube_service_status{namespace="monitoring", status="Active"})
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "All Services are not Active in the monitoring namespace"
+        description: "One or more services in the monitoring namespace are not in the Active state."

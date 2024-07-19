@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: license-registry
+  labels:
+    app: license-registry
+spec:
+  replicas: {{ .Values.licenseregistry.replicaCount }}
+  selector:
+    matchLabels:
+      app: license-registry
+  template:
+    metadata:
+      labels:
+        app: license-registry
+    spec:
+      containers:
+        - name: license-registry
+          image: maximusmaxi/license-registry:latest
+          ports:
+            - containerPort: 5001
