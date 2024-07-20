@@ -142,8 +142,6 @@ pipeline {
             steps {
                 script {
                     echo "Cleaning up"
-                    sh 'kubectl delete pod jenkins-agent-pod --ignore-not-found'
-                    sh 'kubectl delete pod tests --ignore-not-found'
                     echo "Cleanup completed"
                 }
             }
