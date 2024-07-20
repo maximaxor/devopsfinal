@@ -150,7 +150,6 @@ pipeline {
     post {
         always {
             echo "Pipeline finished"
-            cleanWs() // Clean up workspace after each run
         }
         failure {
             echo "Pipeline failed"
