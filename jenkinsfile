@@ -125,12 +125,12 @@ pipeline {
             steps {
                 script {
                     echo "Pushing images to DockerHub"
-                    def services = ['license-registry', 'node', 'image-processor', 'frontend', 'orchestrator', 'api-gateway', 'mongo-db']
+                    def services = ['license-registry', 'node', 'image-processor', 'frontend', 'orchestrator', 'api-gateway', 'mongodb']
                     withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'DOCKER_HUB_TOKEN', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
-                        sh "docker login -u \$DOCKER_HUB_USERNAME -p \$DOCKER_HUB_TOKEN"
+                        sh "echo \$DOCKER_HUB_TOKEN | docker login -u \$DOCKER_HUB_USERNAME --password-stdin"
                         services.each { service ->
                             retry(3) {
-                                sh "docker push maximusmaxi/${service}:${TAG}"
+                                sh "DOCKER_CLI_EXPERIMENTAL=enabled docker push maximusmaxi/${service}:${TAG}"
                             }
                         }
                     }
