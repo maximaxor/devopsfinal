@@ -22,6 +22,9 @@ spec:
         volumeMounts:
         - mountPath: /app/logs
           name: orchestrator-logs
+        env:
+            - name: MONGODB_URL
+              value: "mongodb://mongodb:27017"
       volumes:
       - name: orchestrator-logs
         persistentVolumeClaim:
