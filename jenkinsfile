@@ -10,19 +10,14 @@ pipeline {
         DOCKER_HUB_USERNAME = credentials('docker_hub')
         DOCKER_HUB_TOKEN = credentials('docker_hub')
         TAG = 'latest'
-    }
-    options {
-        // Keep 5 builds for debugging purposes
-        buildDiscarder(logRotator(numToKeepStr: '5'))
-        // Set timeouts to avoid hanging jobs
-        timeout(time: 60, unit: 'MINUTES')
+        HELM_REPO_URL_PUSH = 'github.com/maximaxor/helmfinal.git'
+        GIT_CREDENTIALS_ID = 'git_hub' // Define this variable here
     }
     stages {
         stage('Checkout') {
             steps {
                 script {
                     echo "Starting checkout stage"
-                    // Checkout code from GitHub
                     checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/maximaxor/devopsfinal.git', credentialsId: 'git_hub']]])
                     echo "Checkout completed"
                 }
@@ -32,7 +27,6 @@ pipeline {
             steps {
                 script {
                     echo "Checking Docker installation"
-                    // Check if Docker is installed and install it if not
                     sh '''
                         if ! command -v docker &> /dev/null
                         then
@@ -138,6 +132,53 @@ pipeline {
                 }
             }
         }
+        stage('Create Merge Request') {
+            when {
+                not {
+                    branch 'main'
+                }
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    script {
+                        def branchName = env.BRANCH_NAME
+                        def pullRequestTitle = "Merge ${branchName} into main"
+                        def pullRequestBody = "Automatically generated merge request for branch ${branchName} from Jenkins"
+
+                        sh """
+                            curl -X POST -u ${USERNAME}:${PASSWORD} \
+                            -d '{ "title": "${pullRequestTitle}", "body": "${pullRequestBody}", "head": "${branchName}", "base": "main" }' \
+                            https://api.github.com/repos/maximaxor/devopsfinal/pulls
+                        """
+                    }
+                }
+            }
+        }
+        stage('Helm') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    echo "Building Helm Charts"
+                    sh 'helm package chart/sptr-backend --destination /home/jenkins/agent/workspace/helm-repo'
+                    sh 'helm repo index --url https://maximaxor.github.io/helmfinal /home/jenkins/agent/workspace/helm-repo'
+                    
+                    echo "Pushing helm-repo"
+                    withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        sh """
+                            cd /home/jenkins/agent/workspace/helm-repo
+                            git config --global --add safe.directory /home/jenkins/agent/workspace/helm-repo
+                            git config --global user.email 'jenkins@cluster.com'
+                            git config --global user.name 'Jenkins Automation'
+                            git add .
+                            git commit -m 'Update Helm repo' || true  // Continue even if no changes
+                            git push https://${USERNAME}:${PASSWORD}@${env.HELM_REPO_URL_PUSH} main
+                        """
+                    }
+                }
+            }
+        }
         stage('Cleanup') {
             steps {
                 script {
@@ -153,7 +194,6 @@ pipeline {
         }
         failure {
             echo "Pipeline failed"
-            // Send notification or additional logging
         }
     }
 }
