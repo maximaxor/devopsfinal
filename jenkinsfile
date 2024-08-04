@@ -11,7 +11,7 @@ pipeline {
         DOCKER_HUB_TOKEN = credentials('docker_hub')
         TAG = 'latest'
         HELM_REPO_URL_PUSH = 'github.com/maximaxor/helmfinal.git'
-        GIT_CREDENTIALS_ID = 'git_hub' // Define this variable here
+        GIT_CREDENTIALS_ID = 'git_hub'
     }
     stages {
         stage('Checkout') {
@@ -142,43 +142,52 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     script {
                         def branchName = env.BRANCH_NAME
-                        def pullRequestTitle = "Merge ${branchName} into main"
-                        def pullRequestBody = "Automatically generated merge request for branch ${branchName} from Jenkins"
+                        def commitsCount = sh(script: "git rev-list --count origin/main..origin/${branchName}", returnStdout: true).trim()
+                        if (commitsCount != "0") {
+                            def pullRequestTitle = "Merge ${branchName} into main"
+                            def pullRequestBody = "Automatically generated merge request for branch ${branchName} from Jenkins"
 
-                        sh """
-                            curl -X POST -u ${USERNAME}:${PASSWORD} \
-                            -d '{ "title": "${pullRequestTitle}", "body": "${pullRequestBody}", "head": "${branchName}", "base": "main" }' \
-                            https://api.github.com/repos/maximaxor/devopsfinal/pulls
-                        """
+                            sh '''
+                                curl -X POST -u ${USERNAME}:${PASSWORD} \
+                                -d '{ "title": "${pullRequestTitle}", "body": "${pullRequestBody}", "head": "${branchName}", "base": "main" }' \
+                                https://api.github.com/repos/maximaxor/devopsfinal/pulls
+                            '''
+                        } else {
+                            echo "No commits to merge from ${branchName} to main"
+                        }
                     }
                 }
             }
         }
         stage('Helm') {
-            when {
-                branch 'main'
-            }
-            steps {
-                script {
-                    echo "Building Helm Charts"
-                    sh 'helm package chart/sptr-backend --destination /home/jenkins/agent/workspace/helm-repo'
-                    sh 'helm repo index --url https://maximaxor.github.io/helmfinal /home/jenkins/agent/workspace/helm-repo'
-                    
-                    echo "Pushing helm-repo"
-                    withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh """
-                            cd /home/jenkins/agent/workspace/helm-repo
-                            git config --global --add safe.directory /home/jenkins/agent/workspace/helm-repo
-                            git config --global user.email 'jenkins@cluster.com'
-                            git config --global user.name 'Jenkins Automation'
-                            git add .
-                            git commit -m 'Update Helm repo' || true  // Continue even if no changes
-                            git push https://${USERNAME}:${PASSWORD}@${env.HELM_REPO_URL_PUSH} main
-                        """
+                when {
+                    branch 'main'
+                }
+                steps {
+                    script {
+                        echo "Building Helm Charts"
+                        sh 'helm package myapp/ --destination /home/jenkins/agent/workspace/helm-repo'
+                        sh 'helm repo index --url https://maximaxor.github.io/helmfinal /home/jenkins/agent/workspace/helm-repo'
+                        
+                        echo "Pushing helm-repo"
+                        withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                            sh '''
+                                cd /home/jenkins/agent/workspace/helm-repo
+                                git init
+                                git remote add origin https://${USERNAME}:${PASSWORD}@${HELM_REPO_URL_PUSH}
+                                git config --global --add safe.directory /home/jenkins/agent/workspace/helm-repo
+                                git config --global user.email 'jenkins@cluster.com'
+                                git config --global user.name 'Jenkins Automation'
+                                git pull origin main  # Pull the latest changes from the remote repository
+                                git add .
+                                git commit -m 'Update Helm repo' || true  # Continue even if no changes
+                                git branch -M main  # Rename the branch to main
+                                git push origin main
+                            '''
+                        }
                     }
                 }
             }
-        }
         stage('Cleanup') {
             steps {
                 script {
