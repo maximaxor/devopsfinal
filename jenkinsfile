@@ -160,34 +160,50 @@ pipeline {
             }
         }
         stage('Helm') {
-                when {
-                    branch 'main'
-                }
-                steps {
-                    script {
-                        echo "Building Helm Charts"
-                        sh 'helm package myapp/ --destination /home/jenkins/agent/workspace/helm-repo'
-                        sh 'helm repo index --url https://maximaxor.github.io/helmfinal /home/jenkins/agent/workspace/helm-repo'
-                        
-                        echo "Pushing helm-repo"
-                        withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                            sh '''
-                                cd /home/jenkins/agent/workspace/helm-repo
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    echo "Building Helm Charts"
+                    sh 'helm package myapp/ --destination /home/jenkins/agent/workspace/helm-repo'
+                    sh 'helm repo index --url https://maximaxor.github.io/helmfinal /home/jenkins/agent/workspace/helm-repo'
+
+                    echo "Pushing helm-repo"
+                    withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        sh '''
+                            cd /home/jenkins/agent/workspace/helm-repo
+                            
+                            # Initialize git repository if not already initialized
+                            if [ ! -d .git ]; then
                                 git init
-                                git remote add origin https://${USERNAME}:${PASSWORD}@${HELM_REPO_URL_PUSH}
-                                git config --global --add safe.directory /home/jenkins/agent/workspace/helm-repo
-                                git config --global user.email 'jenkins@cluster.com'
-                                git config --global user.name 'Jenkins Automation'
-                                git pull origin main  # Pull the latest changes from the remote repository
-                                git add .
-                                git commit -m 'Update Helm repo' || true  # Continue even if no changes
-                                git branch -M main  # Rename the branch to main
-                                git push origin main
-                            '''
-                        }
+                            fi
+                            
+                            # Ensure remote origin is set up
+                            git remote remove origin || true
+                            git remote add origin https://${USERNAME}:${PASSWORD}@${HELM_REPO_URL_PUSH}
+                            
+                            # Fetch and reset to ensure clean state
+                            git fetch origin
+                            git reset --hard origin/main || true
+
+                            # Clean up untracked files and directories
+                            git clean -fd
+
+                            # Configure git
+                            git config --global user.email 'jenkins@cluster.com'
+                            git config --global user.name 'Jenkins Automation'
+
+                            # Stage and commit changes
+                            git add .
+                            git commit -m 'Update Helm repo' || true  # Continue even if no changes
+                            git branch -M main  # Ensure branch is named 'main'
+                            git push origin main
+                        '''
                     }
                 }
             }
+        }
         stage('Cleanup') {
             steps {
                 script {
