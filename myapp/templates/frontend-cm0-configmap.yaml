@@ -49,15 +49,14 @@ data:
                     `;
                 } catch (error) {
                     resultDiv.innerHTML = `Error: ${error.response?.data?.error || error.message}`;
-                }
             }
         </script>
     </body>
     </html>
   package.json: |
-    {
+    }
       "name": "license-plate-checker-frontend",
-      "version": "1.0.0"
+      "version": "{{ .Values.frontend.version }}"
     }
 kind: ConfigMap
 metadata:

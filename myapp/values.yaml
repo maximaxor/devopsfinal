@@ -1,17 +1,23 @@
 apigateway:
+  version: "1.0.0"
   replicanum: 1
 
 frontend:
+  version: "1.0.0"
   replicanum: 1
 
 imageprocessor:
+  version: "1.0.0"
   replicanum: 1
 
 licenseregistry:
+  version: "1.0.0"
   replicanum: 1
 
 nodeapp:
+  version: "1.0.0"
   replicanum: 1
 
 orchestrator:
+  version: "1.0.0"
   replicanum: 1

@@ -1,7 +1,7 @@
 apiVersion: v1
-data:
 kind: ConfigMap
 metadata:
   labels:
     io.kompose.service: license-registry
-  name: license-registry-cm0
+  data:
+    version: "{{ .Values.licenseregistry.version }}"

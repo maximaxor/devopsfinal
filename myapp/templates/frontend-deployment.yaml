@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: maximusmaxi/frontend:latest
+          image: maximusmaxi/frontend:{{ .Values.frontend.version }}
           ports:
             - containerPort: 80
           volumeMounts:

@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: image-processor
-          image: maximusmaxi/image-processor:latest
+          image: maximusmaxi/image-processor:{{ .Values.imageprocessor.version }}
           ports:
             - containerPort: 5000

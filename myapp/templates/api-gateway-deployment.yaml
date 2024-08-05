@@ -5,7 +5,7 @@ metadata:
   labels:
     app: api-gateway
 spec:
-  replicas: {{.Values.apigateway.replicanum}}
+  replicas: {{ .Values.apigateway.replicanum }}
   selector:
     matchLabels:
       app: api-gateway
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: maximusmaxi/api-gateway:latest
+          image: maximusmaxi/api-gateway:{{ .Values.apigateway.version }}
           ports:
             - containerPort: 3000
           volumeMounts:

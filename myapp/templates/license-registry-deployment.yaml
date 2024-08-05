@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: license-registry
-          image: maximusmaxi/license-registry:latest
+          image: maximusmaxi/license-registry:{{ .Values.licenseregistry.version }}
           ports:
             - containerPort: 5001

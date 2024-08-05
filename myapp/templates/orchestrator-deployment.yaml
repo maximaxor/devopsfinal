@@ -15,8 +15,8 @@ spec:
         app: orchestrator
     spec:
       containers:
-      - name: orchestrator
-        image: maximusmaxi/orchestrator
+      - name: orchestrato
+        image: maximusmaxi/orchestrator:{{ .Values.orchestrator.version }}
         ports:
         - containerPort: 8000
         volumeMounts:
