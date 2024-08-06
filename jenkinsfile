@@ -159,47 +159,50 @@ pipeline {
                 }
             }
         }
-        stage('Helm') {
+        stage('Update Helm Chart and Push') {
             when {
                 branch 'main'
             }
             steps {
                 script {
-                    echo "Building Helm Charts"
-                    sh 'helm package myapp/ --destination /home/jenkins/agent/workspace/helm-repo'
-                    sh 'helm repo index --url https://maximaxor.github.io/helmfinal /home/jenkins/agent/workspace/helm-repo'
+                    withCredentials([usernamePassword(credentialsId: env.GIT_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        dir('myapp') {
+                            sh '''
+                                # Debug: List files in the directory
+                                echo "Listing files in the directory:"
+                                ls -la
 
-                    echo "Pushing helm-repo"
-                    withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh '''
-                            cd /home/jenkins/agent/workspace/helm-repo
-                            
-                            # Initialize git repository if not already initialized
-                            if [ ! -d .git ]; then
-                                git init
-                            fi
-                            
-                            # Ensure remote origin is set up
-                            git remote remove origin || true
-                            git remote add origin https://${USERNAME}:${PASSWORD}@${HELM_REPO_URL_PUSH}
-                            
-                            # Fetch and reset to ensure clean state
-                            git fetch origin
-                            git reset --hard origin/main || true
+                                # Configure Git safe directory
+                                git config --global --add safe.directory /home/jenkins/agent/workspace/lastpipefrfr_main
+                                git config --global user.email "jenkins@example.com"
+                                git config --global user.name "Jenkins CI"
 
-                            # Clean up untracked files and directories
-                            git clean -fd
+                                # Ensure we are on the correct branch
+                                git checkout main
+                                git pull origin main
 
-                            # Configure git
-                            git config --global user.email 'jenkins@cluster.com'
-                            git config --global user.name 'Jenkins Automation'
+                                # Update chart files
+                                echo "Updating Chart.yaml and values.yaml with build tag ${BUILD_TAG}"
+                                # Ensure BUILD_TAG follows SemVer
+                                VERSION="${BUILD_TAG:-1.0.0}"  # Default to 1.0.0 if BUILD_TAG is not set
+                                sed -i "s/^version:.*/version: ${VERSION}/" Chart.yaml || echo "Failed to update Chart.yaml"
+                                cat Chart.yaml
+                                sed -i "s/^  tag:.*/  tag: ${VERSION}/" values.yaml || echo "Failed to update values.yaml"
+                                cat values.yaml
 
-                            # Stage and commit changes
-                            git add .
-                            git commit -m 'Update Helm repo' || true  # Continue even if no changes
-                            git branch -M main  # Ensure branch is named 'main'
-                            git push origin main
-                        '''
+                                # Package Helm chart
+                                echo "Packaging Helm chart"
+                                helm package .
+                                helm repo index --url https://maximaxor.github.io/helmfinal ./myapp
+
+                                # Add, commit, and push changes
+                                echo "Git status before adding changes:"
+                                git status
+                                git add .
+                                git commit -m "Update Helm chart version to ${VERSION} and image tag to ${VERSION}" || echo "No changes to commit"
+                                git push https://${USERNAME}:${PASSWORD}@github.com/maximaxor/helmfinal.git main
+                            '''
+                        }
                     }
                 }
             }
