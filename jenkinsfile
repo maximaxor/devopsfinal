@@ -9,7 +9,7 @@ pipeline {
         GITHUB_CREDENTIALS = credentials('git_hub')
         DOCKER_HUB_USERNAME = credentials('docker_hub')
         DOCKER_HUB_TOKEN = credentials('docker_hub')
-        TAG = 'latest'
+        TAG = '1.0.0'
         HELM_REPO_URL_PUSH = 'github.com/maximaxor/helmfinal.git'
         GIT_CREDENTIALS_ID = 'git_hub'
     }
