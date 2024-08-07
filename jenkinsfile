@@ -159,7 +159,7 @@ pipeline {
                 }
             }
         }
-        stage('Update Helm Chart and Push') {
+       stage('Update Helm Chart and Push') {
             when {
                 branch 'main'
             }
@@ -171,16 +171,16 @@ pipeline {
                                 # Debug: List files in the directory
                                 echo "Listing files in the directory:"
                                 ls -la
-
+        
                                 # Configure Git safe directory
                                 git config --global --add safe.directory /home/jenkins/agent/workspace/lastpipefrfr_main
                                 git config --global user.email "jenkins@example.com"
                                 git config --global user.name "Jenkins CI"
-
+        
                                 # Ensure we are on the correct branch
                                 git checkout main
                                 git pull origin main
-
+        
                                 # Update chart files
                                 echo "Updating Chart.yaml and values.yaml with build tag ${BUILD_TAG}"
                                 # Ensure BUILD_TAG follows SemVer
@@ -190,12 +190,26 @@ pipeline {
                                 cat Chart.yaml
                                 sed -i "s/^  tag:.*/  tag: ${VERSION}/" values.yaml || echo "Failed to update values.yaml"
                                 cat values.yaml
-
+        
                                 # Package Helm chart
                                 echo "Packaging Helm chart"
                                 helm package .
                                 helm repo index --url https://maximaxor.github.io/helmfinal .
-
+        
+                                # Move packaged Helm chart to a temporary directory
+                                mkdir -p ../helm-packages
+                                mv *.tgz ../helm-packages/
+                                mv index.yaml ../helm-packages/
+        
+                                # Switch to the temporary directory and push changes
+                                cd ../helm-packages
+        
+                                # Initialize a new Git repository
+                                git init
+                                git remote add origin https://github.com/maximaxor/helmfinal.git
+                                git fetch origin
+                                git checkout -b main origin/main || git checkout -b main
+        
                                 # Add, commit, and push changes
                                 echo "Git status before adding changes:"
                                 git status
