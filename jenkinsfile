@@ -9,7 +9,7 @@ pipeline {
         GITHUB_CREDENTIALS = credentials('git_hub')
         DOCKER_HUB_USERNAME = credentials('docker_hub')
         DOCKER_HUB_TOKEN = credentials('docker_hub')
-        TAG = '1.0.0'
+        BUILD_TAG = "1.0.${env.BUILD_NUMBER}"
         HELM_REPO_URL_PUSH = 'github.com/maximaxor/helmfinal.git'
         GIT_CREDENTIALS_ID = 'git_hub'
     }
@@ -96,7 +96,7 @@ pipeline {
                         echo "Building ${service.name}"
                         retry(3) {
                             sh "docker buildx create --use --name ${buildName}"
-                            sh "docker build -t maximusmaxi/${service.name}:${TAG} -f ${service.dockerfile} ."
+                            sh "docker build -t maximusmaxi/${service.name}:${BUILD_TAG} -f ${service.dockerfile} ."
                             sh "docker buildx rm ${buildName}"
                         }
                         echo "${service.name} build completed"
@@ -124,7 +124,7 @@ pipeline {
                         sh "echo \$DOCKER_HUB_TOKEN | docker login -u \$DOCKER_HUB_USERNAME --password-stdin"
                         services.each { service ->
                             retry(3) {
-                                sh "DOCKER_CLI_EXPERIMENTAL=enabled docker push maximusmaxi/${service}:${TAG}"
+                                sh "DOCKER_CLI_EXPERIMENTAL=enabled docker push maximusmaxi/${service}:${BUILD_TAG}"
                             }
                         }
                     }
