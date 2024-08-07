@@ -185,6 +185,7 @@ pipeline {
                                 echo "Updating Chart.yaml and values.yaml with build tag ${BUILD_TAG}"
                                 # Ensure BUILD_TAG follows SemVer
                                 VERSION="${BUILD_TAG:-1.0.0}"  # Default to 1.0.0 if BUILD_TAG is not set
+                                VERSION="${VERSION//[^0-9.]/}"  # Remove non-numeric and non-dot characters
                                 sed -i "s/^version:.*/version: ${VERSION}/" Chart.yaml || echo "Failed to update Chart.yaml"
                                 cat Chart.yaml
                                 sed -i "s/^  tag:.*/  tag: ${VERSION}/" values.yaml || echo "Failed to update values.yaml"
